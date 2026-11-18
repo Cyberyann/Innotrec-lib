@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install
+        run: pip install -e "backend_lib[dev]" -r backend/requirements.txt
+      - name: Lint & types (library)
+        working-directory: backend_lib
+        run: |
+          black --check .
+          ruff check .
+          mypy innotrec_auth
+      - name: Tests (library, incl. e2e API scenario)
+        working-directory: backend_lib
+        run: pytest --cov=innotrec_auth --cov-report=term-missing
+      - name: Lint, types & tests (sample backend)
+        working-directory: backend
+        env:
+          DJANGO_SECRET_KEY: ci-secret
+        run: |
+          black --check .
+          ruff check .
+          mypy .
+          python manage.py makemigrations --check --dry-run
+          pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Doc smoke tests
+        run: npm test -w innotrec-doc
+      - name: Playwright e2e (mocked API)
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+
+  stack:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Start docker compose stack
+        run: |
+          cp deploy/.env.example deploy/.env
+          sed -i "s/^DJANGO_SECRET_KEY=.*/DJANGO_SECRET_KEY=$(openssl rand -hex 32)/" deploy/.env
+          docker compose -f deploy/docker-compose.yml --profile dev up -d --build --wait
+      - name: Full-stack e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run test:e2e:stack -w innotrec-sample-frontend
+      - name: Logs
+        if: failure()
+        run: docker compose -f deploy/docker-compose.yml logs

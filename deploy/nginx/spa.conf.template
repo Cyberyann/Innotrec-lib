@@ -1,0 +1,22 @@
+# Static server for a single-page application (internal, behind the proxy).
+server {
+    listen 8080;
+    server_tokens off;
+    root /usr/share/nginx/html;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    # hashed assets: cache forever
+    location ~* ^${SPA_BASE}assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # SPA fallback: unknown paths serve index.html (never cached)
+    location ${SPA_BASE} {
+        add_header Cache-Control "no-cache";
+        try_files $uri $uri/ ${SPA_BASE}index.html;
+    }
+}

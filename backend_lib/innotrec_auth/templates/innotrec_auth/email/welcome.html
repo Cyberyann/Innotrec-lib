@@ -1,0 +1,6 @@
+{% extends "innotrec_auth/email/base.html" %}
+{% block content %}
+<p>Hello {{ user.first_name|default:user.email }},</p>
+<p>Your {{ app_name }} account is ready.</p>
+{% include "innotrec_auth/email/_button.html" with link=frontend_url label="Open the application" %}
+{% endblock %}

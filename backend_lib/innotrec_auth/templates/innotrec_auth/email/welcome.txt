@@ -1,0 +1,4 @@
+{% autoescape off %}Hello {{ user.first_name|default:user.email }},
+
+Your {{ app_name }} account is ready: {{ frontend_url }}
+{% endautoescape %}

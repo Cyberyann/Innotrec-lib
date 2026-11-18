@@ -1,0 +1,6 @@
+{% autoescape off %}Hello {{ user.first_name|default:user.email }},
+
+Your verification code is: {{ code }}
+
+It expires in {{ ttl_minutes }} minutes. Never share this code with anyone.
+{% endautoescape %}

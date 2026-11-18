@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'backend-v*'
+      - 'frontend-v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  backend:
+    if: startsWith(github.ref_name, 'backend-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Test
+        run: |
+          pip install -e "backend_lib[dev]"
+          cd backend_lib && pytest
+      - name: Build wheel + sdist
+        run: |
+          pip install build
+          python -m build backend_lib --outdir dist
+      - name: Check tag matches version
+        run: |
+          VERSION="$(sed -nE 's/^__version__: str = "([^"]+)"/\1/p' backend_lib/innotrec_auth/__init__.py)"
+          test "backend-v$VERSION" = "${GITHUB_REF_NAME}"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+
+  frontend:
+    if: startsWith(github.ref_name, 'frontend-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: '@innotrec'
+      - run: npm ci
+      - run: npm test -w @innotrec/ui
+      - run: npm run build -w @innotrec/ui
+      - name: Check tag matches version
+        run: test "frontend-v$(node -p "require('./frontend_lib/package.json').version")" = "${GITHUB_REF_NAME}"
+      - name: Publish to GitHub Packages
+        run: npm publish -w @innotrec/ui
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

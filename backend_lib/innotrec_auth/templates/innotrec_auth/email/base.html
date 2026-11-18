@@ -1,0 +1,36 @@
+{% load i18n %}<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f6fb;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2937;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f6fb;padding:32px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+            <tr>
+              <td style="background:#1d4ed8;color:#ffffff;padding:20px 32px;font-size:20px;font-weight:600;">
+                {% block header %}{{ app_name }}{% endblock %}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px;font-size:15px;line-height:1.6;">
+                {% block content %}{% endblock %}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 32px;background:#f9fafb;color:#6b7280;font-size:12px;">
+                {% block footer %}
+                This is an automated message from {{ app_name }}.
+                {% if support_email %}Need help? Contact <a href="mailto:{{ support_email }}">{{ support_email }}</a>.{% endif %}
+                {% endblock %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -1,0 +1,2 @@
+{% autoescape off %}{{ app_name }} – confirm your e-mail address
+{% endautoescape %}
