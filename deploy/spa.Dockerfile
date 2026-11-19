@@ -26,7 +26,7 @@ ENV VITE_API_URL=${VITE_API_URL} \
 COPY ${WORKSPACE} ${WORKSPACE}
 RUN npm run build -w ${WORKSPACE} -- --base=${BASE_PATH}
 
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 ARG WORKSPACE=frontend
 ARG BASE_PATH=/
 ENV SPA_BASE=${BASE_PATH}
