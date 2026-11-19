@@ -2,7 +2,7 @@
 # Build context: repository root.
 #   docker build -f deploy/spa.Dockerfile --build-arg WORKSPACE=frontend .
 #   docker build -f deploy/spa.Dockerfile --build-arg WORKSPACE=doc --build-arg BASE_PATH=/doc/ .
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /repo
 COPY package.json package-lock.json tsconfig.base.json ./
 COPY frontend_lib/package.json frontend_lib/
