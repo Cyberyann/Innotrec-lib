@@ -1,8 +1,8 @@
 # Shared library — in this monorepo it is installed from ../backend_lib (see README / Dockerfile).
 # In another application, pin a released tag instead:
 #   innotrec-auth @ git+https://github.com/<org>/innotrec-lib.git@backend-v1.0.0#subdirectory=backend_lib
-django-environ>=0.11
-gunicorn>=23.0
-psycopg[binary]>=3.2
-whitenoise>=6.7
-redis>=5.0
+django-environ>=0.14
+gunicorn>=27.0
+psycopg[binary]>=3.3
+whitenoise>=6.12
+redis>=8.1

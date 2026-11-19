@@ -27,8 +27,10 @@ Requirements: Python ≥ 3.12, Node ≥ 20, (Docker for the full stack).
 ```bash
 # backend
 python -m venv .venv && source .venv/bin/activate
-pip install -r backend/requirements-dev.txt          # backend_lib installed in editable mode
+pip install -r backend/requirements.txt
+pip install -e backend_lib          # backend_lib installed in editable mode
 cp backend/.env.example backend/.env                 # empty DATABASE_URL = sqlite
+# Adapt .env
 python backend/manage.py migrate
 python backend/manage.py createsuperuser
 python backend/manage.py runserver                   # http://localhost:8000
